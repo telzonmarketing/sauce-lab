@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded',init);window.addEventListener('erro
   var HASH='17906d3f7fa01eb80303de6d9f874b24e52222649c06c091418e32f5db4bed2e'; // SHA-256 of the password
   var FALLBACK=2376727834; // simple hash, used only when crypto is unavailable (e.g. offline file://)
   var FLAG='chickenSauceMindLab_unlocked';
-  var IDLE_MS=15*60*1000; // auto-lock after 15 minutes of no activity
+  var IDLE_MS=30*60*1000; // auto-lock after 30 minutes of no activity
   var gate=document.getElementById('gate'), pass=document.getElementById('gatePass'), err=document.getElementById('gateErr');
   var idleTimer=null;
   function resetIdle(){clearTimeout(idleTimer);if(!gate.classList.contains('hidden'))return;idleTimer=setTimeout(lock,IDLE_MS)}
