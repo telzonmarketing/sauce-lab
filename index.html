@@ -48,7 +48,7 @@ button,.filebtn{border:0;border-radius:14px;padding:11px 14px;background:var(--d
 <body>
 <div id="gate"><div class="gateCard"><div style="font-size:46px">🔒</div><h2>Sauce Lab Locked</h2><p>Enter the password to open the app.</p><input id="gatePass" type="password" inputmode="numeric" placeholder="Password" autocomplete="off" spellcheck="false"><button id="gateBtn" class="orange" type="button" style="width:100%">Unlock</button><div id="gateErr" class="err"></div></div></div>
 <div class="wrap">
-<section class="hero"><div class="badge">🧠 Sauce R&D Engine · Online · India Chicken Burger Only</div><h1>Chicken Burger Sauce Mind Lab Pro</h1><p>Online version: generate all sauce combinations, build exact 500 ml formulas with L Top Mayonnaise, predict Indian taste-bud acceptance, get AI sauce ideas, save your own formulations, and view substitutes, SOP and natural preservation guidance. Hosted online and usable from any device.</p></section>
+<section class="hero"><button id="lockBtn" class="secondary noPrint" type="button" style="position:absolute;top:16px;right:16px;z-index:5">🔒 Lock</button><div class="badge">🧠 Sauce R&D Engine · Online · India Chicken Burger Only</div><h1>Chicken Burger Sauce Mind Lab Pro</h1><p>Online version: generate all sauce combinations, build exact 500 ml formulas with L Top Mayonnaise, predict Indian taste-bud acceptance, get AI sauce ideas, save your own formulations, and view substitutes, SOP and natural preservation guidance. Hosted online and usable from any device.</p></section>
 <div class="layout">
 <aside class="sidebar">
 <section class="card"><h2>1) Intelligent Sauce Builder</h2><div class="ok"><b>Fixed:</b> the generator now shows total valid concepts, filtered matches, rendered cards, and lets you build any concept into a formula.</div>
@@ -239,14 +239,20 @@ document.addEventListener('DOMContentLoaded',init);window.addEventListener('erro
   var HASH='17906d3f7fa01eb80303de6d9f874b24e52222649c06c091418e32f5db4bed2e'; // SHA-256 of the password
   var FALLBACK=2376727834; // simple hash, used only when crypto is unavailable (e.g. offline file://)
   var FLAG='chickenSauceMindLab_unlocked';
+  var IDLE_MS=15*60*1000; // auto-lock after 15 minutes of no activity
   var gate=document.getElementById('gate'), pass=document.getElementById('gatePass'), err=document.getElementById('gateErr');
-  function unlock(){gate.classList.add('hidden')}
+  var idleTimer=null;
+  function resetIdle(){clearTimeout(idleTimer);if(!gate.classList.contains('hidden'))return;idleTimer=setTimeout(lock,IDLE_MS)}
+  function unlock(){gate.classList.add('hidden');resetIdle()}
+  function lock(){clearTimeout(idleTimer);try{localStorage.removeItem(FLAG)}catch(e){}gate.classList.remove('hidden');err.textContent='';pass.value='';try{pass.focus()}catch(e){}}
   function simpleHash(s){var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h}
   async function hash(s){if(window.crypto&&crypto.subtle){var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}return null}
   async function check(){var v=pass.value;var h=await hash(v);var ok=h!==null?h===HASH:simpleHash(v)===FALLBACK;if(ok){try{localStorage.setItem(FLAG,'1')}catch(e){}err.textContent='';unlock()}else{err.textContent='Wrong password. Try again.';pass.value='';pass.focus()}}
   try{if(localStorage.getItem(FLAG)==='1'){unlock()}}catch(e){}
   document.getElementById('gateBtn').addEventListener('click',check);
   pass.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();check()}});
+  var lockBtn=document.getElementById('lockBtn');if(lockBtn)lockBtn.addEventListener('click',lock);
+  ['click','keydown','touchstart','mousemove','scroll'].forEach(function(ev){document.addEventListener(ev,resetIdle,{passive:true})});
   if(!gate.classList.contains('hidden'))pass.focus();
 })();
 </script>
